@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+                            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="trackCounter" class="com.study.soundsystem.TrackCounter"/>
+    <bean id="cd" class="com.study.soundsystem.BlankDisc">
+        <property name="title" value="Sgt. Pepper's Lonely Hearts Club Brand"/>
+        <property name="artist" value="The Beatles"/>
+        <property name="tracks">
+            <list>
+                <value>Sgt. Pepper's Lonely Hearts Club Brand</value>
+                <value>With a Little Help From My Friends</value>
+                <value>Luck in the Sky with Diamonds</value>
+                <value>Getting better</value>
+                <value>Fixing a hole</value>
+            </list>
+        </property>
+    </bean>
+
+    <aop:config>
+
+        <!-- 通过切面引入新功能 -->
+        <aop:aspect>
+            <aop:declare-parents types-matching="com.study.aop.Performance" implement-interface="com.study.aop.Encoreable" default-impl="com.study.aop.DefaultEncoreable"/>
+        </aop:aspect>
+
+        <aop:aspect ref="trackCounter">
+            <aop:pointcut id="trackPlayed" expression="execution(* * com.study.soundsystem.CompactDisc.playTrack(int)) and args(trackNumber)"/>
+            <aop:before method="com.study.soundsystem.TrackCounter.counterTrack" pointcut-ref="trackPlayed"/>
+        </aop:aspect>
+
+        <aop:aspect ref="audienceXML">
+            <aop:before method="silenceCellPhones" pointcut-ref="perform"/>
+            <aop:after-returning method="applause" pointcut-ref="perform"/>
+            <aop:after-throwing method="demandRefund" pointcut-ref="perform"/>
+            <aop:around method="watchPerformance" pointcut-ref="perform"/>
+            <aop:pointcut id="perform" expression="execution(* * com.study.aop.Performance.perform(..))"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>
